@@ -1,6 +1,6 @@
 # PolicyLens container image. Built to run on OpenShift's restricted security context:
 # non-root, no privilege escalation, and an arbitrary user id that belongs to group 0.
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
