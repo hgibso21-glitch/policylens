@@ -2,8 +2,6 @@
 
 **A firewall policy analyzer: audit rule sets, certify them against a security baseline, and ship the service to OpenShift through an automated, spec-driven, agent-assisted pipeline.**
 
-> AI-generated proof of concept: this repository was created in a single AI-assisted build to demonstrate a resume-ready engineering workflow rather than a long-lived production codebase. The goal is to show spec-first design, agentic development guardrails, GitHub Actions automation, unit and API testing, container scaffolding, and deployment-oriented configuration. The project uses synthetic mock data only and intentionally includes the project structure and automation patterns that would normally be built across a team workflow, even though the Git history is intentionally short for a portfolio artifact.
-
 [![CI](https://github.com/hgibso21-glitch/policylens/actions/workflows/ci.yml/badge.svg)](https://github.com/hgibso21-glitch/policylens/actions/workflows/ci.yml)
 [![Deploy](https://github.com/hgibso21-glitch/policylens/actions/workflows/deploy-openshift.yml/badge.svg)](https://github.com/hgibso21-glitch/policylens/actions/workflows/deploy-openshift.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
@@ -22,20 +20,6 @@ All data in this repository is **synthetic mock data**. No real network, firewal
 
 ---
 
-## Portfolio note: one-shot AI-generated prototype
-
-This repository was built as a portfolio project to demonstrate a complete spec-driven engineering workflow: OpenSpec requirements, agentic development guardrails, automated CI/CD checks, container scaffolding, and a production-style service design. It is intentionally built as a clean, self-contained project artifact that showcases disciplined software engineering practices while using synthetic mock data only.
-
-The value here is not just the firewall rule logic itself. The project showcases:
-
-- Spec-based development with OpenSpec before implementation
-- Agentic development guardrails via [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md), and [.github/copilot-instructions.md](.github/copilot-instructions.md)
-- GitHub Actions automation for linting, tests, coverage, OpenSpec validation, and image smoke checks
-- Security-focused container and deployment scaffolding for Docker and OpenShift
-- Synthetic data and clear separation of pure logic, API routes, persistence, and deployment config
-
-This makes the repository useful as a resume project and interview artifact: it demonstrates the ability to design a small system end-to-end, enforce quality gates, and work with AI agents in a disciplined, reviewable way.
-
 ## Contents
 
 - [What it does](#what-it-does)
@@ -51,7 +35,6 @@ This makes the repository useful as a resume project and interview artifact: it 
 - [Configuration](#configuration)
 - [Project structure](#project-structure)
 - [Roadmap](#roadmap)
-- [Use it as a template](#use-it-as-a-template)
 - [Contributing](#contributing)
 
 ---
@@ -279,13 +262,9 @@ pyproject.toml          Dependencies, packaging, ruff, pytest and coverage confi
 - [ ] Multi-firewall path analysis across two or three rule sets in sequence.
 - [ ] Update and delete for rule sets.
 
-## Use it as a template
-
-The engineering system here (tests, container, OpenShift manifests, CI, specs, agent guardrails) is not specific to firewalls. To build a similar project on the same foundation, follow [docs/adapting-the-template.md](docs/adapting-the-template.md).
-
 ## Contributing
 
 1. Read [AGENTS.md](AGENTS.md).
 2. Start from an OpenSpec change, write the failing test first, then the code.
 3. `ruff check . && ruff format --check . && pytest --cov` must pass.
-4. Open a pull request using the template, including the AI-usage section.
+4. Open a pull request with a clear summary of the change and the verification you ran.
