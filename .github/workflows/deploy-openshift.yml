@@ -1,0 +1,62 @@
+name: Deploy to OpenShift
+
+# Manual on purpose: a human decides when something reaches the cluster.
+# One-time setup (see docs/openshift.md):
+#   secrets:   OPENSHIFT_SERVER, OPENSHIFT_TOKEN
+#   variables: OPENSHIFT_NAMESPACE
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Create an "openshift" environment in the repo settings to add a required reviewer.
+    environment: openshift
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out image name
+        run: |
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+
+      - name: Log in to OpenShift
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          namespace: ${{ vars.OPENSHIFT_NAMESPACE }}
+
+      - name: Point the manifests at this build
+        working-directory: deploy/openshift
+        run: |
+          sed -i "s|newName: .*|newName: ${IMAGE}|; s|newTag: .*|newTag: ${GITHUB_SHA}|" kustomization.yaml
+
+      - name: Apply manifests
+        run: oc apply -k deploy/openshift
+
+      - name: Wait for rollout
+        run: oc rollout status deployment/policylens --timeout=180s
+
+      - name: Show URL
+        run: echo "https://$(oc get route policylens -o jsonpath='{.spec.host}')/docs"

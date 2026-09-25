@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: policylens
+  labels:
+    app.kubernetes.io/name: policylens
+spec:
+  to:
+    kind: Service
+    name: policylens
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest:*)",
+      "Bash(python -m ruff:*)",
+      "Bash(pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(openspec:*)",
+      "Bash(npx @fission-ai/openspec@1:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(docker build:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(docker push:*)",
+      "Bash(oc apply:*)",
+      "Edit(./AGENTS.md)",
+      "Edit(./Dockerfile)",
+      "Edit(./.github/workflows/**)",
+      "Edit(./.claude/**)",
+      "Edit(./deploy/openshift/**)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Edit(./.env)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf:*)",
+      "Bash(oc login:*)",
+      "Bash(oc delete:*)",
+      "Bash(kubectl delete:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/format_python.py"
+          }
+        ]
+      }
+    ]
+  }
+}

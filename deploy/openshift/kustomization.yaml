@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Apply with:  oc apply -k deploy/openshift   (the namespace comes from your current project)
+resources:
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - route.yaml
+
+# The deploy workflow rewrites newName and newTag; edit newName by hand for manual deploys.
+images:
+  - name: policylens
+    newName: ghcr.io/hgibso21-glitch/policylens
+    newTag: latest

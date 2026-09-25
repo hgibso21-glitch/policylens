@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policylens
+  labels:
+    app.kubernetes.io/name: policylens
+spec:
+  # One replica: the demo database is a SQLite file, which can't be shared between pods.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: policylens
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: policylens
+    spec:
+      containers:
+        - name: policylens
+          image: policylens
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: policylens-config
+          # No runAsUser: OpenShift assigns one. These settings satisfy the restricted-v2 SCC.
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: policylens-config
+  labels:
+    app.kubernetes.io/name: policylens
+data:
+  # Mock rule sets are loaded on startup so the demo has data. Set to "false" for a real deployment.
+  SEED_MOCK_DATA: "true"
+  DATABASE_URL: "sqlite:////data/policylens.db"

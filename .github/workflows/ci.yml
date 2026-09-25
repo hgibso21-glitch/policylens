@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Format check
+        run: ruff format --check .
+
+      - name: Tests with coverage gate
+        run: pytest --cov --cov-report=xml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+          if-no-files-found: ignore
+
+  specs:
+    name: Validate OpenSpec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate specs and changes
+        run: npx --yes @fission-ai/openspec@1 validate --all --strict
+
+  image:
+    name: Build and smoke-test image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: policylens:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Run the way OpenShift does: an arbitrary non-root user id in group 0.
+      - name: Smoke test
+        run: |
+          docker run -d --name policylens --user 1234:0 -p 8080:8080 \
+            -e SEED_MOCK_DATA=true policylens:ci
+          curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 1 \
+            http://localhost:8080/readyz
+          curl --fail --silent --show-error http://localhost:8080/rulesets | grep -q prod-web-tier
+
+      - name: Container logs
+        if: failure()
+        run: docker logs policylens

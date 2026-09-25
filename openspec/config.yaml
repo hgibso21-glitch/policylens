@@ -1,0 +1,19 @@
+schema: spec-driven
+
+# Project context, shown to AI when creating artifacts.
+context: |
+  PolicyLens is a small FastAPI service that analyses firewall rule sets: it audits them for
+  redundant or over-permissive rules and certifies them against a baseline.
+  Tech stack: Python 3.12, FastAPI, Uvicorn, SQLAlchemy 2 (SQLite), pytest, ruff.
+  Delivery: Docker image, deployed to OpenShift (manifests in deploy/openshift), CI in GitHub Actions.
+  Layout: app/engine.py and app/baseline.py are pure logic (no web, no DB); app/routes.py only
+  translates HTTP to those functions; app/repository.py is the only place that writes the database.
+  Conventions: see AGENTS.md. Every requirement scenario should map to at least one pytest test.
+  Domain: IPv4 only; rules evaluated top to bottom, first match wins, implicit deny.
+
+rules:
+  proposal:
+    - Include a "Non-goals" section so scope stays small.
+  tasks:
+    - Write the failing pytest test for a scenario before the code that satisfies it.
+    - Keep each task small enough to finish and commit on its own.
